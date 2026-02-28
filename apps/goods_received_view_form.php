@@ -263,6 +263,16 @@ document.querySelectorAll('.receiving-now').forEach(input => {
 
         row.querySelector('.balance').textContent = (ordered - received - receivingNow);
     });
+
+    input.addEventListener('keydown', function(e) {
+        if(e.key === 'Enter') {
+            e.preventDefault();
+            if(barcodeScanInput) {
+                barcodeScanInput.focus();
+                barcodeScanInput.select();
+            }
+        }
+    });
 });
 
 const barcodeScanInput = document.getElementById('gr-barcode-scan');
@@ -284,14 +294,26 @@ function focusQtyByScannedBarcode(scannedBarcode) {
         }
     });
 
-    if(!targetRow){
-        swal("Warning","Scanned barcode is not part of this PO.","warning");
-        return;
-    }
+        if(!targetRow){
+            swal("Warning","Scanned barcode is not part of this PO.","warning")
+                .then(() => {
+                    if(barcodeScanInput) {
+                        barcodeScanInput.focus();
+                        barcodeScanInput.select();
+                    }
+                });
+            return;
+        }
 
     const qtyInput = targetRow.querySelector('.receiving-now');
     if(!qtyInput || qtyInput.disabled){
-        swal("Warning","Item is fully received or not editable.","warning");
+        swal("Warning","Item is fully received or not editable.","warning")
+            .then(() => {
+                if(barcodeScanInput) {
+                    barcodeScanInput.focus();
+                    barcodeScanInput.select();
+                }
+            });
         return;
     }
 
