@@ -144,6 +144,39 @@ try {
             $remarks
         );
         $stmt_log->execute();
+
+        /* ===============================
+           UPDATE INVENTORY STOCK
+        ================================ */
+        $db->select_db('rosebakeshop_data');
+        
+        // Check if item exists in inventory
+        $check_inv = $db->prepare("SELECT stock_in_hand FROM wms_inventory_stock WHERE item_code = ?");
+        $check_inv->bind_param("s", $item_code);
+        $check_inv->execute();
+        $inv_result = $check_inv->get_result();
+        
+        if ($inv_result->num_rows > 0) {
+            // Update existing stock
+            $stmt_inv_update = $db->prepare("
+                UPDATE wms_inventory_stock 
+                SET stock_in_hand = stock_in_hand + ? 
+                WHERE item_code = ?
+            ");
+            $stmt_inv_update->bind_param("ds", $received_qty, $item_code);
+            $stmt_inv_update->execute();
+        } else {
+            // Insert new inventory record if item doesn't exist
+            $stmt_inv_insert = $db->prepare("
+                INSERT INTO wms_inventory_stock (item_code, stock_in_hand) 
+                VALUES (?, ?)
+            ");
+            $stmt_inv_insert->bind_param("sd", $item_code, $received_qty);
+            $stmt_inv_insert->execute();
+        }
+        
+        // Switch back to main database
+        $db->select_db(DB_NAME);
     }
 
     /* ===============================

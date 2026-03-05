@@ -42,9 +42,10 @@ if ($isReviseMode) {
 
 
 $branches = [];
+$db->select_db('rosebakeshop_data');
 $res = $db->query("SELECT branch FROM tbl_branch ORDER BY branch");
 while($r = $res->fetch_assoc()){
-    $branches[] = $r['branch'];
+	$branches[] = $r['branch'];
 }
 
 $existing_destination = '';
