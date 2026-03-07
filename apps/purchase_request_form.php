@@ -9,7 +9,19 @@ $branch = $_SESSION['branch_branch'] ?? '';
 // Fetch all active warehouse items
 $sql = "SELECT id, recipient, item_code, category, class, item_description, unit_price, uom 
         FROM wms_itemlist 
-        WHERE recipient='BRANCH' AND active=1";
+        WHERE recipient='BRANCH' AND active=1
+        AND (
+            NOT EXISTS (
+                SELECT 1 FROM wms_item_module_visibility mv0
+                WHERE mv0.item_id = wms_itemlist.id AND mv0.active=1
+            )
+            OR EXISTS (
+                SELECT 1 FROM wms_item_module_visibility mv1
+                WHERE mv1.item_id = wms_itemlist.id
+                AND mv1.module_code='Branch_Ordering_System'
+                AND mv1.active=1
+            )
+        )";
 $result = $db->query($sql);
 $items = [];
 if($result && $result->num_rows > 0){
